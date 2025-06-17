@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>민물가마우지의 습격</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --font-main: 'Noto Sans KR', sans-serif;
+            --color-text: #333;
+            --color-bg: #f4f1ea;
+            --color-accent: #5D4037; /* 갈색 계열 */
+            --color-warning: #c0392b; /* 붉은색 계열 (위협, 경고) */
+            --color-safe: #27ae60; /* 초록색 계열 (해결, 안전) */
+            --color-dark-overlay: rgba(0,0,0,0.6);
+            --color-light-text: #f8f8f8;
+            --color-card-bg: #fff;
+            --color-border: #ddd;
+        }
+
+        body {
+            font-family: var(--font-main); margin: 0; color: var(--color-text);
+            background-color: var(--color-bg); line-height: 1.7;
+        }
+
+        /* --- 인트로 섹션 --- */
+        .intro-section {
+            height: 100vh;
+            background-image: linear-gradient(var(--color-dark-overlay), var(--color-dark-overlay)), url('https://species.nibr.go.kr/UPLOAD/digital/species/12000000/120000001565/PC_20201110160345_FJCMSDFTDO.jpg');
+            background-size: cover; background-position: center;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; color: var(--color-light-text);
+            padding: 20px; box-sizing: border-box; position: relative;
+        }
+        .intro-section h1 { font-size: 3.5em; font-weight: 900; margin-bottom: 0.2em; text-shadow: 2px 2px 8px rgba(0,0,0,0.7); opacity: 0; transform: translateY(20px); animation: fadeInText 1s 0.5s forwards; }
+        .intro-section .intro-subtitle { font-size: 1.5em; font-weight: 700; margin-bottom: 0.8em; text-shadow: 1px 1px 6px rgba(0,0,0,0.7); opacity: 0; transform: translateY(20px); animation: fadeInText 1s 0.8s forwards; }
+        .intro-section .intro-comment { font-size: 1.1em; line-height: 1.6; max-width: 600px; opacity: 0; transform: translateY(20px); animation: fadeInText 1s 1.1s forwards; text-shadow: 1px 1px 4px rgba(0,0,0,0.6); }
+        .scroll-down-arrow-intro { position: absolute; bottom: 30px; font-size: 2em; color: rgba(255,255,255,0.7); animation: bounceIntro 2s infinite 2s; opacity: 0; }
+        @keyframes fadeInText { to { opacity: 1; transform: translateY(0); } }
+        @keyframes bounceIntro { 0%, 20%, 50%, 80%, 100% {transform: translateY(0); opacity: 0.7;} 40% {transform: translateY(-10px); opacity: 1;} 60% {transform: translateY(-5px); opacity: 0.8;} }
+
+        /* --- 백화현상 이미지 섹션 --- */
+        .whitening-image-section {
+            min-height: 100vh; background-color: #222;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; padding: 20px; box-sizing: border-box; overflow: hidden;
+        }
+        .whitening-image-section h2 { font-size: 2.5em; color: var(--color-light-text); font-weight: 700; padding: 10px 20px; background-color: rgba(0,0,0,0.7); border-radius: 8px; text-shadow: 1px 1px 4px #000; margin-bottom: 20px; z-index: 1; }
+        .detailed-whitening-photo-container { width: 95vw; height: 85vh; display: flex; justify-content: center; align-items: center; }
+        .detailed-whitening-photo { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px; box-shadow: 0 15px 40px rgba(0,0,0,0.5); opacity: 0; transform: scale(0.95); animation: zoomInPhoto 1s 0.3s forwards; }
+        @keyframes zoomInPhoto { to { opacity: 1; transform: scale(1); } }
+
+        /* --- 공통 섹션 스타일 --- */
+        .content-section { padding: 70px 20px; max-width: 1100px; margin: 0 auto; text-align: center; }
+        .content-section .section-title { font-size: 2.6em; font-weight: 900; color: var(--color-accent); margin-bottom: 50px; position: relative; padding-bottom: 20px; }
+        .content-section .section-title::after { content: ''; position: absolute; left: 50%; transform: translateX(-50%); bottom: 0; width: 100px; height: 5px; background-color: var(--color-accent); border-radius: 3px; }
+        .content-section .sub-title { font-size: 1.8em; font-weight: 700; color: var(--color-text); margin-top: 40px; margin-bottom: 25px; text-align: left; }
+        .content-section .descriptive-paragraph { font-size: 1.15em; line-height: 1.8; max-width: 800px; margin: -20px auto 40px auto; color: #444; text-align: center; }
+        .content-section .transition-question { font-size: 1.25em; font-weight: 700; line-height: 1.7; max-width: 800px; margin: 0 auto; color: var(--color-text); text-align: center; }
+        .section-footer-note { text-align: center; font-size: 0.9em; color: #777; margin-top: 30px; }
+
+        /* --- 유입 이유 섹션 (reason-grid) --- */
+        .reason-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px; margin-top: 30px; align-items: stretch; }
+        @media (max-width: 900px) { .reason-grid { grid-template-columns: 1fr; } }
+        .reason-item { background-color: var(--color-card-bg); padding: 30px; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.08); text-align: left; display: flex; flex-direction: column;}
+        .reason-item h3 { font-size: 1.5em; color: var(--color-accent); margin-top: 0; margin-bottom: 15px; display: flex; align-items: center; }
+        .reason-item h3 .icon-placeholder { width: 36px; height: 36px; background-color: #eee; border-radius: 50%; margin-right: 12px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.1em; color: var(--color-accent); flex-shrink: 0;}
+        .reason-item h3 .icon-placeholder i { line-height: 1; }
+        .reason-item p { font-size: 1.05em; line-height: 1.75; margin-bottom: 12px; color: #444; flex-grow:1; }
+        .reason-item p:last-child { margin-bottom: 0; }
+        .reason-item .expert-opinion { font-size: 0.95em; font-style: italic; color: #666; border-left: 3px solid var(--color-accent); padding-left: 10px; margin-top: 10px; }
+        .dual-graph-container { display: flex; flex-wrap: wrap; gap: 25px; margin-top: 15px; }
+        .graph-box { flex: 1; min-width: 280px; height: 320px; background-color: #fdfdfd; padding: 15px; border-radius: 8px; box-shadow: 0 3px 10px rgba(0,0,0,0.05); border: 1px solid #eee;}
+        .graph-box h4 { text-align: center; margin-top:0; margin-bottom:10px; font-size:1.05em; color: var(--color-text); font-weight: 700;}
+        .infographic-box { background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin-top: 15px; text-align: center; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 300px; }
+        .infographic-box h4 { font-size: 1.1em; margin-top: 0; margin-bottom: 20px; color: var(--color-text); }
+        .infographic-content { display: flex; align-items: center; justify-content: center; gap: 15px; }
+        .infographic-content i { font-size: 2.5em; color: var(--color-accent); }
+        .infographic-text { font-size: 1.5em; font-weight: bold; color: var(--color-warning); }
+
+        /* --- 지도 및 모달 --- */
+        .map-container { position: relative; width: 100%; max-width: 800px; margin: 40px auto; border: 2px solid var(--color-border); border-radius: 8px; overflow: hidden; background-color: #eaf2f5; }
+        .map-container img#gangwonMap { display: block; width: 100%; height: auto; }
+        .map-marker { position: absolute; width: 28px; height: 28px; background-color: rgba(255,0,0,0.8); border-radius: 50%; border: 2px solid white; cursor: pointer; transform: translate(-50%, -50%); display: flex; align-items: center; justify-content:center; color: white; font-size:0.8em; font-weight: bold; box-shadow: 0 0 8px rgba(0,0,0,0.5); }
+        .map-marker:hover { background-color: darkred; transform: translate(-50%, -50%) scale(1.1); }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.8); padding-top: 30px; }
+        .modal-content { background-color: var(--color-card-bg); margin: 3% auto; padding: 30px; border-radius: 12px; width: 90%; max-width: 700px; box-shadow: 0 8px 25px rgba(0,0,0,0.25); position: relative; }
+        .close-button { color: #777; position: absolute; top: 15px; right: 20px; font-size: 36px; font-weight: bold; cursor: pointer; line-height: 1; }
+        .close-button:hover, .close-button:focus { color: #333; }
+        .modal-content img.damage-photo { width:100%; max-height:70vh; object-fit:contain; border-radius:8px; margin-bottom:15px; cursor: pointer; border: 1px solid var(--color-border); }
+        .modal-content h3 { margin-top:0; color: var(--color-accent); font-size: 1.8em;}
+        .modal-content h4 { margin-top:15px; margin-bottom:5px; font-size: 1.2em; color: #444;}
+        .modal-content p { font-size: 1.05em; line-height: 1.6;}
+
+        /* --- 지역별 대응 현황 (표) --- */
+        .response-table-section .section-title { color: var(--color-accent); }
+        .response-table-section .section-title::after { background-color: var(--color-accent); }
+        .response-table-container { overflow-x: auto; margin-top: 20px; border: 1px solid var(--color-border); border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+        .response-table { width: 100%; border-collapse: collapse; background-color: var(--color-card-bg); }
+        .response-table th, .response-table td { padding: 16px; border-bottom: 1px solid var(--color-border); text-align: left; vertical-align: top; }
+        .response-table th { background-color: #f8f9fa; color: var(--color-accent); font-size: 1.1em; font-weight: 700; text-align: center; }
+        .response-table td:first-child { font-weight: bold; color: var(--color-text); text-align: center; width: 15%; }
+        .response-table td:nth-child(2) { width: 35%; }
+        .response-table td p { margin-top: 0; margin-bottom: 5px; font-size: 0.95em; line-height: 1.6; color: #555;}
+        .response-table .response-actions { list-style-type: none; padding-left: 0; margin: 0; font-size: 0.9em; color: #444; }
+        .response-table .response-actions li { margin-bottom: 6px; padding-left: 20px; position: relative; }
+        .response-table .response-actions li::before { content: "\f0da"; font-family: "Font Awesome 6 Free"; font-weight: 900; color: var(--color-accent); position: absolute; left: 0; top: 2px; }
+
+        /* --- 민물가마우지의 그림자 (피해 내용) 섹션 --- */
+        .section-subtitle-warning { font-size: 1.1em; color: #555; margin-top: -30px; margin-bottom: 40px; max-width: 700px; margin-left: auto; margin-right: auto; line-height: 1.6; }
+        .damage-details-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 20px; }
+        .damage-card { background-color: var(--color-card-bg); padding: 25px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: left; border-top: 4px solid var(--color-accent); transition: transform 0.3s ease, box-shadow 0.3s ease; display: flex; flex-direction: column; }
+        .damage-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
+        .damage-card-header { display: flex; align-items: center; margin-bottom: 15px; }
+        .damage-card .damage-icon { font-size: 2.8em; color: var(--color-accent); margin-right: 15px; flex-shrink: 0; }
+        .damage-card h4 { font-size: 1.45em; color: var(--color-accent); margin-top: 0; margin-bottom: 5px; line-height: 1.3; }
+        .damage-card p.description { font-size: 1.0em; line-height:1.6; color: #444; margin-bottom: 15px; flex-grow: 1; }
+        .visualization-area { width: 100%; height: 200px; margin-bottom: 15px; background-color: #f9f9f9; border-radius: 6px; padding: 10px; box-sizing: border-box; display: flex; justify-content: center; align-items: center; }
+        .visualization-area canvas { max-width: 100%; max-height: 100%; }
+        .visualization-area .data-highlight { font-size: 1.3em; font-weight: bold; color: var(--color-warning); text-align: center; }
+        .data-caption { font-size: 0.8em; color: #888; text-align: right; margin-top: 5px; }
+        .impact-summary { font-size: 1.2em; font-weight: bold; color: var(--color-warning); display: block; text-align: center; margin-top: 10px; padding: 8px; background-color: #fff3f3; border-radius: 4px; border: 1px dashed var(--color-warning); }
+        
+        /* --- 결론 섹션 --- */
+        .conclusion-section .section-title { color: var(--color-safe); }
+        .conclusion-section .section-title::after { background-color: var(--color-safe); }
+        .conclusion-text {
+            font-size: 1.2em;
+            line-height: 1.9;
+            max-width: 850px;
+            margin: -20px auto 0 auto;
+            text-align: left;
+            color: #333;
+            text-indent: 1.5em; /* 첫 문단 들여쓰기 */
+        }
+        .conclusion-text p {
+            margin-bottom: 1.5em;
+        }
+        .conclusion-text p:last-child {
+            margin-bottom: 0;
+        }
+        .conclusion-text strong {
+            color: var(--color-accent);
+            font-weight: 700;
+        }
+
+        /* --- 출처 및 저작권 섹션 --- */
+        .footer-section {
+            padding: 50px 20px;
+            margin-top: 70px;
+            background-color: #e0dccd; /* 기존 배경보다 살짝 어둡게 */
+            text-align: center;
+            border-top: 1px solid #ccc;
+        }
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+            color: #555;
+        }
+        .footer-content h4 {
+            font-size: 1.3em;
+            color: var(--color-accent);
+            margin-top: 0;
+            margin-bottom: 25px;
+        }
+        .footer-content .source-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 auto;
+            font-size: 0.9em;
+            line-height: 1.8;
+            max-width: 600px;
+            text-align: left;
+        }
+        .footer-content .source-list li {
+            margin-bottom: 8px;
+            padding-left: 15px;
+            position: relative;
+        }
+        .footer-content .source-list li::before {
+            content: "·";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+        .footer-content .copyright-text {
+            margin-top: 40px;
+            font-size: 0.95em;
+            font-weight: 700;
+            color: var(--color-text);
+        }
+        
+        /* 반응형 조정 */
+        @media (max-width: 768px) {
+            .intro-section h1 { font-size: 2.8em; }
+            .intro-section .intro-subtitle { font-size: 1.3em; }
+            .whitening-image-section h2 { font-size: 2em; }
+            .content-section .section-title { font-size: 2.2em; margin-bottom: 40px;}
+            .content-section .descriptive-paragraph { font-size: 1.1em; margin-bottom: 30px; }
+            .content-section .transition-question { font-size: 1.15em; }
+            .reason-item h3 { font-size: 1.4em; }
+            .reason-item p { font-size: 1em; }
+            .graph-box { height: 300px; }
+            .damage-card .damage-icon { font-size: 2.5em; }
+            .damage-card h4 { font-size: 1.3em; }
+            .visualization-area { height: 180px; }
+            .impact-summary { font-size: 1.1em; }
+            .conclusion-text { font-size: 1.1em; }
+        }
+         @media (max-width: 480px) {
+            .intro-section h1 { font-size: 2.2em; }
+            .intro-section .intro-subtitle { font-size: 1.1em; }
+            .intro-section .intro-comment { font-size: 0.95em; }
+            .whitening-image-section h2 { font-size: 1.6em; }
+            .content-section { padding: 50px 15px; }
+            .content-section .section-title { font-size: 1.8em; margin-bottom: 30px;}
+            .content-section .descriptive-paragraph { font-size: 1em; margin-bottom: 20px; }
+            .content-section .transition-question { font-size: 1.05em; }
+            .reason-grid { grid-template-columns: 1fr; gap: 25px; }
+            .reason-item { padding: 20px; }
+            .reason-item h3 { font-size: 1.3em; }
+            .graph-box { height: 280px; }
+            .map-marker { width: 24px; height: 24px; font-size: 0.7em; }
+            .modal-content { padding: 20px; }
+            .modal-content h3 { font-size: 1.5em; }
+            .damage-details-container { gap: 20px; }
+            .damage-card { padding: 20px; }
+            .damage-card .damage-icon { font-size: 2.2em; margin-right: 10px; }
+            .damage-card h4 {font-size: 1.2em;}
+            .damage-card p.description { font-size: 0.9em; }
+            .visualization-area { height: 160px; }
+            .impact-summary { font-size: 1em; }
+            .response-table th, .response-table td { padding: 12px 8px; font-size: 0.9em; }
+            .conclusion-text { font-size: 1em; text-align: justify; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 인트로 섹션 -->
+    <section class="intro-section">
+        <h1>민물가마우지의 습격</h1>
+        <p class="intro-subtitle">"강원도를 위협하는 자연의 침입자"</p>
+        <p class="intro-comment">푸르렀던 강원도의 호수가 하얀 절규로 뒤덮이고 있습니다.<br>그 보이지 않는 공포의 중심에는 민물가마우지가 자리하고 있습니다.</p>
+        <div class="scroll-down-arrow-intro">▼</div>
+    </section>
+
+    <!-- 백화현상 이미지 섹션 -->
+    <section class="whitening-image-section">
+        <h2>나무가 눈물 흘린다…<br>민물가마우지가 남긴 흰 흔적</h2>
+        <div class="detailed-whitening-photo-container">
+            <img src="https://cdn.geojenews.co.kr/news/photo/202502/86552_79539_5245.jpg" alt="백화현상으로 하얗게 변한 나무와 민물가마우지" class="detailed-whitening-photo">
+        </div>
+    </section>
+
+    <!-- 백화현상 원인 설명 -->
+    <section class="content-section">
+        <h2 class="section-title">백화현상의 원인: 침묵의 가해자, 민물가마우지</h2>
+        <p class="descriptive-paragraph">
+            사진에서 보시는 것처럼 나무들이 하얗게 변해버린 현상, 바로 '백화현상'입니다.<br>
+            그렇다면 이와 같은 현상이 나타나는 이유는 무엇일까요?<br><br>
+            이는 다름 아닌 <strong style="color: var(--color-accent);">민물가마우지의 배설물 때문</strong>입니다.<br>
+            강한 산성을 띤 이들의 배설물이 지속적으로 쌓이면서 나무와 토양을 오염시켜 식물을 고사시키는 것입니다.<br>
+            아름다운 자연 경관이 파괴되고 생태계 균형까지 위협받고 있습니다.
+        </p>
+    </section>
+
+    <!-- 강원도 유입 이유 질문 -->
+    <section class="content-section" style="padding-top: 20px; padding-bottom: 40px;">
+         <p class="transition-question">
+            이처럼 심각한 피해를 유발하는 민물가마우지.<br>
+            과거에는 주로 남부지방에서 겨울 철새로 관찰되거나 일부가 텃새화되었지만, 최근 몇 년 사이 이들이 <strong style="color: var(--color-warning);">강원도까지 북상하여 그 수가 폭발적으로 증가</strong>하는 양상을 보입니다.<br>
+            이들이 북쪽으로, 특히 강원도로 향하는 복합적인 이유는 무엇일까요?
+        </p>
+    </section>
+
+    <!-- 유입이유 섹션 -->
+    <section class="content-section">
+        <h2 class="section-title">왜 강원도인가? 민물가마우지 북상의 복합적 원인</h2>
+        <div class="reason-grid">
+            <div class="reason-item">
+                <h3><span class="icon-placeholder"><i class="fas fa-thermometer-half"></i></span>1. 기후변화와 서식지 확장</h3>
+                <p>지구온난화로 겨울철 평균 기온이 상승하면서, 과거 민물가마우지의 주요 월동지였던 남부지방의 환경이 변화하고 있습니다. 따뜻해진 겨울은 이들이 더 북쪽 지역에서도 생존하고 번식할 수 있는 가능성을 열어주었습니다.</p>
+                <p>강원도는 과거보다 온화해진 겨울 기후와 함께, 상대적으로 경쟁이 덜하고 새로운 번식지로서의 잠재력을 갖춘 지역으로 인식되었을 수 있습니다. 남부지역의 기존 서식지가 포화 상태에 이르거나 먹이 경쟁이 심화되면서, 생존과 번식을 위한 새로운 터전을 찾아 북상하는 자연스러운 생태적 확장 과정으로 볼 수 있습니다.</p>
+                 <p class="expert-opinion">"민물가마우지는 환경 적응력이 뛰어나, 기후 변화에 따라 새로운 서식지를 빠르게 개척하는 종입니다. 한반도 전체의 기온 상승은 이들의 북상을 가속화시키는 주요인입니다." (조류 생태학자 A 박사)</p>
+                <div class="dual-graph-container">
+                    <div class="graph-box">
+                        <h4>한반도 연평균 기온 변화</h4>
+                        <canvas id="temperatureTrendChart"></canvas>
+                    </div>
+                    <div class="graph-box">
+                        <h4>강원도 민물가마우지 개체수 변화</h4>
+                        <canvas id="cormorantPopulationChartSub"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="reason-item">
+                <h3><span class="icon-placeholder"><i class="fas fa-water"></i></span>2. 풍부한 수자원과 먹이 환경</h3>
+                <p>민물가마우지는 하루 평균 500g에서 최대 1kg의 어류를 섭취하는 대식가입니다. 강원도에는 소양호, 의암호, 파로호와 같은 대형 호수와 남한강, 북한강 등 주요 하천이 발달해 있어 어족 자원이 비교적 풍부합니다. 붕어, 잉어, 피라미는 물론, 일부 지역에서는 송어, 메기 등 다양한 어종이 서식합니다.</p>
+                <p>이러한 풍부한 먹이 자원은 민물가마우지가 특정 지역에 대규모로 군집을 이루고 성공적으로 번식하며 개체수를 급격히 늘리는 데 결정적인 요인으로 작용합니다.</p>
+                <div class="infographic-box">
+                    <h4>일일 섭취량 (성체 기준)</h4>
+                    <div class="infographic-content">
+                        <i class="fas fa-crow"></i>
+                        <i class="fas fa-arrow-right"></i>
+                        <i class="fas fa-fish-fins"></i>
+                    </div>
+                    <p class="infographic-text">500g ~ 1kg</p>
+                </div>
+            </div>
+
+            <div class="reason-item">
+                <h3><span class="icon-placeholder"><i class="fas fa-dove"></i></span>3. 천적 감소와 생태적 우위</h3>
+                <p>자연 생태계에서 민물가마우지의 알이나 어린 새끼를 공격할 수 있는 천적(예: 대형 맹금류, 일부 포유류)의 수가 과거에 비해 감소했거나, 인간 활동으로 인해 서식지가 파괴되어 천적의 영향력이 줄어들었습니다. 이는 민물가마우지의 생존율과 번식 성공률을 높이는 요인이 됩니다.</p>
+                <p>또한, 다른 조류와의 먹이 경쟁이나 서식지 경쟁에서도 민물가마우지는 공격적인 성향과 뛰어난 잠수 능력, 집단 행동을 통해 우위를 점하는 경우가 많습니다. 특히 인간의 간섭이 적은 도서 지역이나 인공섬 등에서는 경쟁자 없이 안정적으로 서식지를 확보하고 확장해 나갈 수 있습니다.</p>
+            </div>
+
+            <div class="reason-item">
+                <h3><span class="icon-placeholder"><i class="fas fa-landmark"></i></span>4. 인공 구조물 활용과 서식지 변화</h3>
+                <p>댐, 저수지, 교량, 고압선 철탑 등 인간이 만든 다양한 인공 구조물들이 민물가마우지에게는 의도치 않게 안전하고 효율적인 휴식처, 관찰 지점, 그리고 번식 장소를 제공합니다. 이러한 구조물들은 지상 포식자로부터의 위협을 피하기 용이하고, 넓은 시야를 확보하여 먹이 탐색에도 유리합니다.</p>
+                <p>더불어 하천 정비 사업으로 만들어진 인공섬, 수변공원의 인적이 드문 곳, 심지어 도심 근처의 호수나 강변까지 서식 범위를 넓히고 있습니다. 자연 서식지의 변화와 함께 인공 환경에 대한 적응력이 높아지면서 이들의 분포는 더욱 확산되고 있습니다.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="content-section">
+        <h2 class="section-title">강원도 곳곳이 몸살… 주요 피해 지역 현황</h2>
+        <div class="map-container">
+            <img id="gangwonMap" src="https://state.gwd.go.kr/upload/image_attach/2023/11/administrative_map1.png" alt="강원도 행정구역도">
+            <div class="map-marker" data-region="소양강" data-top="39%" data-left="40%" title="소양강(춘천시) 피해 현황">춘</div>
+            <div class="map-marker" data-region="경포호" data-top="43%" data-left="75%" title="경포호(강릉시) 피해 현황">강</div>
+            <div class="map-marker" data-region="섬강" data-top="72%" data-left="33%" title="섬강(원주시) 피해 현황">원</div>
+        </div>
+        <p class="section-footer-note">지도 위의 <span style="color:red; font-weight:bold;">붉은 점</span>을 클릭하면 해당 지역의 피해 상황을 확인할 수 있습니다.<br>(마커 위치는 해당 시/군의 대략적인 중심부를 나타냅니다.)</p>
+    </section>
+
+    <div id="damageModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" title="닫기">×</span>
+            <h3 id="modalRegionName">지역명</h3>
+            <img id="modalDamagePhoto" src="" alt="피해 사진" class="damage-photo" title="클릭하여 크게 보기 (새 탭)">
+            <h4>주요 피해 내용:</h4>
+            <p id="modalDamageDetails">구체적인 피해 내용이 여기에 표시된다.</p>
+            <h4>추정 개체 수 / 피해 상황:</h4>
+            <p id="modalPopulation">정보 로딩 중...</p>
+            <p style="font-size:0.8em; text-align:right; margin-top:10px;">(사진 클릭 시 더 크게 볼 수 있습니다)</p>
+        </div>
+    </div>
+    
+    <!-- 지역별 대응 현황 (표) -->
+    <section class="content-section response-table-section">
+        <h2 class="section-title">지역별 대응 현황: 지자체의 힘겨운 사투</h2>
+        <p class="section-subtitle-warning" style="font-weight:normal; color: #444;">
+            피해가 심각해지자 강원도 내 주요 지자체들도 문제 해결을 위해 발 벗고 나서고 있습니다.<br>
+            지역 특성에 맞는 다양한 방법으로 민물가마우지와의 힘겨운 싸움을 벌이는 중입니다.
+        </p>
+        <div class="response-table-container">
+            <table class="response-table">
+                <thead>
+                    <tr>
+                        <th>지역</th>
+                        <th>주요 대응 방향</th>
+                        <th>세부 활동</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>춘천시</strong></td>
+                        <td><p>대규모 호수(소양호, 의암호)를 중심으로 어족자원 보호 및 서식지 관리</p></td>
+                        <td>
+                            <ul class="response-actions">
+                                <li>드론 활용 정기적 개체수 파악 및 빅데이터화</li>
+                                <li>주요 교량 및 인공섬 대상 조류 퇴치기 설치</li>
+                                <li>피해 어민 대상 지원 조례 제정 검토</li>
+                                <li>빙어 등 치어 방류 사업 확대</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>강릉시</strong></td>
+                        <td><p>대표 관광지(경포호)의 생태·경관 훼손 방지를 위한 선제적·입체적 관리</p></td>
+                        <td>
+                            <ul class="response-actions">
+                                <li>조류 퇴치용 레이저 시스템 시범 운영</li>
+                                <li>주변 산책로 및 시설물 주기적 청소·소독</li>
+                                <li>백화현상 피해목 긴급 제거 및 대체 식재</li>
+                                <li>탐방객 대상 안내 및 협조 홍보</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>원주시</strong></td>
+                        <td><p>섬강 유역 양식장 및 농경지 피해 최소화를 위한 민·관·군 합동 대응</p></td>
+                        <td>
+                            <ul class="response-actions">
+                                <li>민·관·군 합동 방제단 운영 (공포탄 등)</li>
+                                <li>피해 양식장 대상 그물망 설치 등 시설 지원</li>
+                                <li>번식기 집중 관리 및 서식지 환경 개선</li>
+                                <li>피해 농가 실태조사 및 보상책 마련 논의</li>
+                            </ul>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="content-section">
+        <h2 class="section-title">민물가마우지의 그림자: 데이터로 보는 현실</h2>
+        <p class="section-subtitle-warning">
+            단순한 새의 증가를 넘어, 민물가마우지는 강원도 생태계와 주민들의 삶에 깊고 어두운 그림자를 드리우고 있습니다.
+            그 피해는 광범위하며, 회복에는 오랜 시간과 노력이 필요합니다.
+        </p>
+        <div class="damage-details-container">
+            <div class="damage-card">
+                <div class="damage-card-header">
+                    <i class="fas fa-fish-fins damage-icon"></i><h4>어족자원 고갈</h4>
+                </div>
+                <p class="description">강원도 주요 호수 및 하천에서 토종 어류 포식으로 인한 어획량 급감, 내수면 어업 생산성 저하.</p>
+                <div class="visualization-area">
+                    <canvas id="fishDepletionChart"></canvas>
+                </div>
+                <p class="impact-summary"><strong>소양호 빙어 어획량, 최근 5년 간 약 70% 감소 추정</strong></p>
+            </div>
+
+            <div class="damage-card">
+                <div class="damage-card-header">
+                    <i class="fas fa-tint-slash damage-icon"></i><h4>수질오염 심화</h4>
+                </div>
+                <p class="description">대규모 서식지 주변, 배설물로 인한 부영양화 및 수질 악화. 녹조 발생 빈도 증가 및 수생태계 건강성 악화.</p>
+                <div class="visualization-area">
+                     <canvas id="waterQualityChart"></canvas>
+                </div>
+                <p class="impact-summary"><strong>의암호 가마우지 서식지, 총인(T-P) 농도 환경기준 2.5배 초과</strong></p>
+            </div>
+
+            <div class="damage-card">
+                <div class="damage-card-header">
+                    <i class="fas fa-tree-city damage-icon"></i><h4>식생 고사 (백화현상)</h4>
+                </div>
+                <p class="description">강산성 배설물이 나무와 토양에 축적되어 식생 고사. 특히 호수나 강변의 수목 군락지 피해 심각.</p>
+                 <div class="visualization-area">
+                    <p class="data-highlight" style="font-size:1.8em;">피해 면적<br><strong style="font-size:2em; color:var(--color-warning);">약 30ha</strong><br>(철원 DMZ 인근 습지, 2023)</p>
+                </div>
+                <p class="impact-summary"><strong>철원 주요 습지, 조류 서식 수목 60% 이상 백화 피해</strong></p>
+            </div>
+
+            <div class="damage-card">
+                <div class="damage-card-header">
+                    <i class="fas fa-house-damage damage-icon"></i><h4>어민 생계 위협</h4>
+                </div>
+                <p class="description">내수면 어획량 감소로 어민 소득 급감. 양식장 가마우지 습격으로 인한 직접적인 경제적 피해 발생.</p>
+                <div class="visualization-area">
+                    <canvas id="fishermenIncomeChart"></canvas>
+                </div>
+                <p class="impact-summary"><strong>파로호 어민 70%, "가마우지로 연 소득 30% 이상 감소"</strong></p>
+            </div>
+
+            <div class="damage-card">
+                <div class="damage-card-header">
+                     <i class="fas fa-person-hiking damage-icon"></i><h4>관광자원 훼손</h4>
+                </div>
+                <p class="description">백화현상으로 인한 경관 파괴, 배설물 악취 등으로 주요 관광지 매력도 저하 및 방문객 감소.</p>
+                 <div class="visualization-area">
+                     <canvas id="tourismImpactChart"></canvas>
+                </div>
+                <p class="impact-summary"><strong>경포호, 여름 성수기 탐방객 만족도 25% 하락</strong></p>
+            </div>
+             <div class="damage-card">
+                <div class="damage-card-header">
+                     <i class="fas fa-leaf damage-icon"></i><h4>생태계 교란</h4>
+                </div>
+                <p class="description">특정 어종 집중 포식으로 인한 먹이사슬 불균형. 다른 조류 및 수생 생물 서식 환경 변화 야기.</p>
+                 <div class="visualization-area">
+                    <p class="data-highlight" style="font-size:1.5em;">"가마우지 개체수 급증 지역,<br><strong style="color:var(--color-warning);">타 물새류 다양성 15% 감소</strong>"</p>
+                </div>
+                <p class="impact-summary"><strong>남한강 상류, 특정 소형 어종 급감으로 포식자 경쟁 심화</strong></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 결론 섹션 -->
+    <section class="content-section conclusion-section">
+        <h2 class="section-title">결론: 공존의 지혜를 찾아, 지속가능한 해법을 향하여</h2>
+        <div class="conclusion-text">
+            <p>
+                강원도를 뒤덮은 민물가마우지의 검은 그림자는 이제 단순한 생태 문제를 넘어 지역 사회의 존립을 위협하는 중대한 현실이 되었습니다. 어족자원 고갈과 백화현상, 어민들의 생계 위협에 이르기까지 피해는 광범위하며, 춘천, 강릉, 원주 등 각 지자체는 저마다의 방식으로 사투를 벌이고 있습니다.
+            </p>
+            <p>
+                그러나 드론과 레이저를 동원한 퇴치 작전이나 피해 복구 노력만으로는 근본적인 해결에 한계가 있음이 분명합니다. 단기적인 대응을 넘어, <strong>기후변화라는 거대한 흐름 속에서 변화하는 생태계를 이해하고, 과학적 데이터에 기반한 장기적인 개체수 관리 계획을 수립하는 것이 시급합니다.</strong> 이는 민물가마우지만을 표적으로 삼는 것이 아니라, 서식지 환경 관리, 어족자원 회복 등 수생태계 전반의 건강성을 되찾는 종합적인 접근이어야 합니다.
+            </p>
+            <p>
+                결국 이 문제는 '어떻게 몰아낼 것인가'가 아닌 '어떻게 공존할 것인가'에 대한 지혜를 요구합니다. 민물가마우지는 침입자이면서 동시에 변화된 환경에 적응한 자연의 일부이기도 합니다. 피해를 최소화하고 지속가능한 균형점을 찾기 위한 노력에 지역 사회와 전문가, 그리고 <strong>우리 모두의 지속적인 관심과 참여</strong>가 더해질 때, 비로소 강원도는 푸른 숨결을 되찾을 수 있을 것입니다.
+            </p>
+        </div>
+    </section>
+
+    <!-- 제작자 정보 섹션 -->
+    <section class="content-section" id="creator-info">
+        <h2 class="section-title" style="color: #333; --color-accent: #333;">제작자 정보</h2>
+        <img src="https://postfiles.pstatic.net/MjAyNTA2MTdfNjIg/MDAxNzUwMTUzMjE4NTY0.vVKc1La7lNG9NXvn4PosH6ZllPHBm7t29aDnEikJV20g.OXmvFPvsSdUCnXRjrVTmMmMBaXCT1MSNdJhvcOOv2B8g.JPEG/KakaoTalk_20250617_163527023.jpg?type=w3840" 
+             alt="제작자 정보 이미지" 
+             style="
+                display: block; 
+                margin: 20px auto 0; 
+                max-width: 100%; 
+                width: 700px;
+                border-radius: 10px; 
+                box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+             ">
+    </section>
+
+    <!-- 출처 및 저작권 정보 섹션 -->
+    <footer class="footer-section">
+        <div class="footer-content">
+            <h4>자료 및 사진 출처</h4>
+            <ul class="source-list">
+                <li>기온 및 개체수: 기상청, 환경부, 각 지자체 조사 자료</li>
+                <li>어족자원·수질·관광객: 강원연구원, 환경부, 강릉시 모니터링 자료</li>
+                <li>백화현상·생태계: 국립생태원, 국내 조류학회 발표 자료</li>
+                <li>어민 피해: 각 지자체 설문조사 자료</li>
+                <li>페이지 내 사진: 연합뉴스, 거제저널뉴스, KADO.NET, 국립생물자원관 등 언론 및 공공기관 보도/공개 자료</li>
+            </ul>
+            <p class="copyright-text">
+                &copy; 2024. 민물가마우지 습격 프로젝트. All Rights Reserved.
+            </p>
+        </div>
+    </footer>
+
+
+    <script>
+        // Chart.js 기본 설정 및 플러그인 등록
+        Chart.register(ChartDataLabels);
+        Chart.defaults.set('plugins.datalabels', {
+            anchor: 'end',
+            align: 'top',
+            formatter: (value, context) => {
+                if (context.chart.config.type === 'line') return value.toFixed(1);
+                if (context.chart.config.type === 'pie' || context.chart.config.type === 'doughnut') {
+                     let sum = 0;
+                     let dataArr = context.chart.data.datasets[0].data;
+                     dataArr.map(data => { sum += data; });
+                     let percentage = (value*100 / sum).toFixed(1)+"%";
+                     return percentage;
+                }
+                return Math.round(value);
+            },
+            font: { weight: 'bold', size: 10 },
+            color: '#333'
+        });
+
+        const commonChartOptions = {
+            responsive: true, maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true, title: { display: true, font: {size: 10} }, ticks: { precision: 0, font: {size: 9} } },
+                x: { title: { display: true, text: '연도', font: {size: 10} }, ticks: {font: {size: 9}} }
+            },
+            plugins: {
+                legend: { display: true, position: 'top', labels: {font: {size: 10}} },
+            }
+        };
+        const years = ['2018', '2019', '2020', '2021', '2022', '2023'];
+
+        // 1. 기온 변화 및 가마우지 개체수 (유입 이유 섹션)
+        const temperatureData = [7.8, 8.1, 8.5, 8.8, 9.2, 9.6]; 
+        const cormorantPopulationData = [1200, 2500, 4500, 7800, 11500, 15000];
+        const tempCtx = document.getElementById('temperatureTrendChart');
+        if (tempCtx) {
+            new Chart(tempCtx.getContext('2d'), {
+                type: 'line',
+                data: { labels: years, datasets: [{ label: '한반도 연평균 기온 (°C)', data: temperatureData, borderColor: 'rgba(255, 99, 132, 1)', backgroundColor: 'rgba(255, 99, 132, 0.2)', tension: 0.1, fill: true }] },
+                options: { ...commonChartOptions, scales: { ...commonChartOptions.scales, y: { ...commonChartOptions.scales.y, title: { ...commonChartOptions.scales.y.title, text: '평균 기온 (°C)' }}}}
+            });
+        }
+        const cormorantSubCtx = document.getElementById('cormorantPopulationChartSub');
+        if (cormorantSubCtx) {
+            new Chart(cormorantSubCtx.getContext('2d'), {
+                type: 'bar',
+                data: { labels: years, datasets: [{ label: '강원도 민물가마우지 추정 개체 수', data: cormorantPopulationData, backgroundColor: 'rgba(54, 162, 235, 0.7)', borderColor: 'rgba(54, 162, 235, 1)', borderWidth: 1 }] },
+                options: { ...commonChartOptions, scales: { ...commonChartOptions.scales, y: { ...commonChartOptions.scales.y, title: { ...commonChartOptions.scales.y.title, text: '개체 수 (마리)' }}}}
+            });
+        }
+
+        // 2. 어족자원 고갈 그래프 (데이터로 보는 현실 섹션)
+        const fishDepletionCtx = document.getElementById('fishDepletionChart');
+        if (fishDepletionCtx) {
+            new Chart(fishDepletionCtx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: ['2019', '2020', '2021', '2022', '2023'],
+                    datasets: [
+                        { label: '소양호 빙어 어획량 (톤)', data: [120, 95, 70, 50, 35], borderColor: 'rgba(255, 159, 64, 1)', tension: 0.1, yAxisID: 'y_fish' },
+                        { label: '소양호 가마우지 관찰 수(추정)', data: [1500, 2800, 5000, 8000, 11000], borderColor: 'rgba(153, 102, 255, 1)', tension: 0.1, type:'bar', yAxisID: 'y_cormorant' }
+                    ]
+                },
+                options: { ...commonChartOptions,
+                    scales: {
+                        y_fish: { type: 'linear', display: true, position: 'left', title: { display: true, text: '어획량 (톤)', font:{size:9} }, ticks:{font:{size:8}} },
+                        y_cormorant: { type: 'linear', display: true, position: 'right', title: { display: true, text: '가마우지 수 (마리)', font:{size:9} }, grid: { drawOnChartArea: false }, ticks:{font:{size:8}} },
+                        x: { ...commonChartOptions.scales.x, title: { ...commonChartOptions.scales.x.title, text: '연도' } }
+                    },
+                    plugins: { ...commonChartOptions.plugins, datalabels: {enabled: true, align:'end', anchor:'end'} }
+                }
+            });
+        }
+
+        // 3. 수질오염 심화 그래프 (데이터로 보는 현실 섹션)
+        const waterQualityCtx = document.getElementById('waterQualityChart');
+        if (waterQualityCtx) {
+            new Chart(waterQualityCtx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['2020년 의암호 (가마우지 적음)', '2023년 의암호 (가마우지 많음)'],
+                    datasets: [{
+                        label: '총인(T-P) 농도 (mg/L)',
+                        data: [0.025, 0.075],
+                        backgroundColor: ['rgba(75, 192, 192, 0.6)', 'rgba(231, 76, 60, 0.6)'],
+                        borderColor: ['rgba(75, 192, 192, 1)', 'rgba(231, 76, 60, 1)'],
+                        borderWidth: 1
+                    }]
+                },
+                options: { ...commonChartOptions, indexAxis: 'y', scales: { ...commonChartOptions.scales, x: { ...commonChartOptions.scales.x, title: { display: true, text: '총인 농도 (mg/L)' } }, y: { title: {display:false}} }, plugins: {...commonChartOptions.plugins, legend: {display:false}, datalabels:{anchor:'center', align:'center', color:'white', font:{size:11}}}}
+            });
+        }
+
+        // 4. 어민 생계 위협 그래프 (데이터로 보는 현실 섹션)
+        const fishermenIncomeCtx = document.getElementById('fishermenIncomeChart');
+        if (fishermenIncomeCtx) {
+            new Chart(fishermenIncomeCtx.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: ['소득 50% 이상 감소', '소득 30-50% 감소', '소득 10-30% 감소', '영향 거의 없음'],
+                    datasets: [{
+                        label: '파로호 어민 소득 변화 체감도 (설문)',
+                        data: [45, 30, 15, 10],
+                        backgroundColor: ['#E74C3C', '#F39C12', '#F1C40F', '#2ECC71'],
+                        hoverOffset: 4
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels:{font:{size:9}} }, datalabels: { color: '#fff', font: {weight: 'bold', size: 9} } } }
+            });
+        }
+        
+        // 5. 관광자원 훼손 그래프 (데이터로 보는 현실 섹션)
+        const tourismImpactCtx = document.getElementById('tourismImpactChart');
+        if (tourismImpactCtx) {
+            new Chart(tourismImpactCtx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: ['2019', '2020', '2021', '2022', '2023'],
+                    datasets: [{
+                        label: '경포호 연간 방문객 만족도 지수',
+                        data: [85, 82, 75, 68, 60],
+                        borderColor: 'rgba(155, 89, 182, 1)',
+                        backgroundColor: 'rgba(155, 89, 182, 0.1)',
+                        fill: true,
+                        tension: 0.1
+                    }]
+                },
+                options: { ...commonChartOptions, scales: { ...commonChartOptions.scales, y: { ...commonChartOptions.scales.y, title: { display: true, text: '관광객 만족도 지수' }} } }
+            });
+        }
+
+        // --- 모달, 지도 마커 관련 JS ---
+        const modal = document.getElementById('damageModal');
+        const modalRegionName = document.getElementById('modalRegionName');
+        const modalDamagePhoto = document.getElementById('modalDamagePhoto');
+        const modalDamageDetails = document.getElementById('modalDamageDetails');
+        const modalPopulation = document.getElementById('modalPopulation');
+        const closeButton = document.getElementsByClassName('close-button')[0];
+        const markers = document.querySelectorAll('.map-marker');
+        const gangwonMap = document.getElementById('gangwonMap');
+        const damageData = {
+            "소양강": { photo: "https://img3.yna.co.kr/etc/inner/KR/2020/06/04/AKR20200604157500062_02_i_P2.jpg", details: "춘천시 북동부 소양호 및 소양강 상류 일대. 어족자원 고갈, 백화현상 심각. 특히 빙어, 쏘가리 등 개체 수 급감 보고.", population: "약 5,000 마리 이상 (춘천시 추정)" },
+            "경포호": { photo: "https://img0.yna.co.kr/photo/yna/YH/2023/04/20/PYH2023042010790006200_P4.jpg", details: "강릉시 동해안에 위치한 대표적 석호. 호수 주변 나무 및 철새 관찰대 배설물 피해, 수질 악화 및 관광자원 훼손 우려.", population: "약 2,500 마리 (강릉시 추정)" },
+            "섬강": { photo: "https://m.kwnews.co.kr/2024/06/13/2024061314144040216_l.jpg", details: "원주시 남서부를 흐르는 강. 강변 식생 백화현상, 수질 문제 및 주변 농경지, 양식장 피해 우려 제기.", population: "약 1,800 마리 (원주시 추정)" }
+        };
+        if (gangwonMap) {
+            const positionMarkers = () => { markers.forEach(marker => { marker.style.top = marker.dataset.top; marker.style.left = marker.dataset.left; }); };
+            if (gangwonMap.complete && gangwonMap.naturalHeight !== 0) { positionMarkers(); } else { gangwonMap.onload = positionMarkers; }
+        }
+        markers.forEach(marker => {
+            marker.onclick = function() {
+                const region = this.dataset.region;
+                const data = damageData[region];
+                if (data) {
+                    modalRegionName.textContent = region + " 피해 현황";
+                    modalDamagePhoto.src = data.photo || "default-damage-placeholder.jpg";
+                    modalDamagePhoto.alt = region + " 피해 사진";
+                    modalDamageDetails.textContent = data.details;
+                    modalPopulation.textContent = data.population;
+                    modal.style.display = "block";
+                }
+            }
+        });
+        if(modalDamagePhoto){ modalDamagePhoto.onclick = function() { if(this.src && this.src.indexOf("default-damage-placeholder.jpg") === -1){ window.open(this.src, '_blank'); } } }
+        if(closeButton) { closeButton.onclick = function() { modal.style.display = "none"; } }
+        window.onclick = function(event) { if (event.target == modal) { modal.style.display = "none"; } }
+
+        // --- 스크롤 애니메이션 (IntersectionObserver) ---
+        // #creator-info 섹션과 footer는 애니메이션에서 제외
+        const animatedElements = document.querySelectorAll('.content-section:not(#creator-info), .reason-item, .damage-card, .graph-box, .map-container, .detailed-whitening-photo, .response-table-container, .conclusion-text');
+        
+        const scrollObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    if (entry.target.classList.contains('detailed-whitening-photo')) {}
+                    else { entry.target.style.opacity = 1; entry.target.style.transform = 'translateY(0)';}
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.05 });
+
+        animatedElements.forEach(el => {
+            if (!el.classList.contains('detailed-whitening-photo')) {
+                el.style.opacity = 0; el.style.transform = 'translateY(40px)';
+                el.style.transition = 'opacity 0.8s ease-out, transform 0.8s ease-out';
+            }
+            scrollObserver.observe(el);
+        });
+
+        const scrollArrow = document.querySelector('.scroll-down-arrow-intro');
+        if (scrollArrow) {
+            setTimeout(() => { scrollArrow.style.opacity = 0.7; }, 1500);
+        }
+    </script>
+</body>
+</html>
